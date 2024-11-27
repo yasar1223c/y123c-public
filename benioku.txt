@@ -1,0 +1,99 @@
+Afet Yardım Sistemi - Kurulum ve Kullanım Kılavuzu
+================================================
+
+Sistem Gereksinimleri
+--------------------
+- Node.js (v18 veya üzeri)
+- npm (Node.js ile birlikte gelir)
+- Modern bir web tarayıcısı (Chrome, Firefox, Safari, Edge)
+
+Kurulum Adımları
+---------------
+1. Projeyi bilgisayarınıza indirin
+
+2. Terminal veya komut istemcisinde proje klasörüne gidin:
+   cd afet-yardim-sistemi
+
+3. Gerekli paketleri yükleyin:
+   npm install
+
+4. Uygulamayı başlatın:
+   npm run dev
+
+5. Tarayıcınızda otomatik olarak açılacak olan adresi ziyaret edin
+   (genellikle http://localhost:5173)
+
+SMS ve E-posta Bildirimleri Kurulumu
+----------------------------------
+Sistemde SMS ve e-posta gönderimi için aşağıdaki adımları takip etmeniz gerekmektedir:
+
+1. SMS Gönderimi için:
+   - Bir SMS servis sağlayıcısı ile anlaşma yapın (örn: Twilio, Netgsm, İletimerkezi)
+   - .env dosyası oluşturup SMS servis bilgilerini ekleyin:
+     SMS_API_KEY=your_api_key
+     SMS_SECRET=your_secret
+     SMS_SENDER_ID=your_sender_id
+
+2. E-posta Gönderimi için:
+   - SMTP sunucu bilgilerini .env dosyasına ekleyin:
+     SMTP_HOST=smtp.example.com
+     SMTP_PORT=587
+     SMTP_USER=your_email@example.com
+     SMTP_PASS=your_password
+
+Not: Şu anda bu özellikler simüle edilmektedir. Gerçek SMS ve e-posta gönderimi için:
+1. /src/services/notification.ts dosyası oluşturun
+2. SMS ve e-posta gönderim fonksiyonlarını implement edin
+3. PersonnelDashboard.tsx içindeki sendRoute fonksiyonunu güncelleyin
+
+Örnek notification.ts implementasyonu:
+
+```typescript
+// src/services/notification.ts
+export async function sendSMS(phone: string, message: string) {
+  // SMS API entegrasyonu
+  const response = await fetch('SMS_API_ENDPOINT', {
+    method: 'POST',
+    body: JSON.stringify({ phone, message }),
+    headers: {
+      'Authorization': `Bearer ${process.env.SMS_API_KEY}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.ok;
+}
+
+export async function sendEmail(email: string, subject: string, message: string) {
+  // SMTP sunucu entegrasyonu
+  const response = await fetch('YOUR_EMAIL_API_ENDPOINT', {
+    method: 'POST',
+    body: JSON.stringify({ email, subject, message }),
+    headers: {
+      'Authorization': `Bearer ${process.env.SMTP_USER}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.ok;
+}
+```
+
+Sistem Kullanımı
+--------------
+1. Vatandaş Sayfası (Ana Sayfa):
+   - İsim, soyisim, TC kimlik no ve adres bilgilerini girin
+   - Haritadan konumunuzu işaretleyin
+   - İhtiyaç duyulan malzemeleri ve miktarlarını belirtin
+   - Formu gönderin
+
+2. Personel Sayfası (/personnel):
+   - Haritada SHIFT tuşuna basılı tutarak fare ile alan seçin
+   - Seçilen alandaki toplam talepleri görüntüleyin
+   - İletişim bilgilerinizi (telefon ve/veya e-posta) girin
+   - "Rotayı Gönder" butonuna tıklayarak seçili alan raporunu alın
+
+Güvenlik Notları
+--------------
+- .env dosyasını asla versiyon kontrolüne eklemeyin
+- Hassas bilgileri (API anahtarları, şifreler) güvenli bir şekilde saklayın
+- Üretim ortamında HTTPS kullanın
+- Kullanıcı girişlerini her zaman doğrulayın ve sanitize edin
